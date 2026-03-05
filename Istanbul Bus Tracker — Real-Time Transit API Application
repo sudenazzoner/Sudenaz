@@ -1,0 +1,72 @@
+# 🚌 Istanbul Bus Tracker — Real-Time Transit API Application
+
+A Python application that integrates with **Istanbul Metropolitan Municipality (IMM)**
+open data APIs to provide real-time bus tracking, stop information, and fleet analytics.
+Built for CSE 102 – Programming Practice, Spring 2024.
+
+---
+
+## 📌 Features
+
+| Function | Description |
+|---|---|
+| `announcements(line_code)` | Fetches service announcements for a bus line |
+| `stopping_buses()` | Lists door numbers of all currently stopped buses |
+| `max_speeds()` | Returns the top 3 fastest buses in real time |
+| `show_line_stops(line_code, direction)` | Lists all stops for a line and direction |
+| `live_tracking(line_code, direction)` | Saves live bus + stop data and returns coordinates |
+
+---
+
+## 🚀 Usage
+
+```python
+# Get announcements for line 11H
+print(announcements("11H"))
+# Output: (2, ['TEPEÜSTÜ dan Saat 19:24 de hareket etmesi...', '...'])
+
+# List all stops for line 19T, departure direction
+print(show_line_stops("19T", "G"))
+# Output: ['ATATÜRK BULVARI', 'SEYİD NİZAM CADDESİ', ...]
+
+# Live tracking for line 122C
+stops, buses = live_tracking("122C", "G")
+# Also writes to where.js for map visualization
+```
+
+---
+
+## 🗺️ Live Map Visualization
+
+After running `live_tracking()`, open `where_is_my_bus.html` in a browser
+to see real-time bus and stop positions on an interactive Istanbul map.
+
+---
+
+## 🛠️ Requirements
+
+```bash
+pip install zeep
+```
+
+- `zeep` — SOAP API client for IETT Fleet Management services
+- `urllib`, `json`, `xml` — Standard library for REST/JSON/XML APIs
+
+---
+
+## 📡 APIs Used
+
+- **IETT SOAP Web Service** — Fleet management, real-time bus locations
+- **IBB Open Data REST API** — Line stops, route information
+- Data source: [data.ibb.gov.tr](https://data.ibb.gov.tr/en/)
+
+---
+
+## 🔗 Relevance to Precision Medicine
+
+Although this is a transit application, the core skills transfer directly:
+- Querying **SOAP/REST APIs** (same pattern as clinical data APIs, e.g. HL7 FHIR)
+- Handling **real-time streaming data** (analogous to continuous patient monitoring)
+- **Geospatial data processing** (relevant to epidemiology and disease mapping)
+
+---
