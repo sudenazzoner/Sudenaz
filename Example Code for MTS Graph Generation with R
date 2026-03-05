@@ -1,0 +1,59 @@
+# Install packages
+install.packages(c("ggplot2","dplyr","ggpubr","rstatix"))
+
+library(ggplot2)
+library(dplyr)
+library(ggpubr)
+library(rstatix)
+
+# Example 96-well MTS data
+data <- data.frame(
+  Treatment = rep(c("Control","Drug1","Drug2","Drug3"), each = 6),
+  Absorbance = c(
+    0.95,0.97,0.94,0.96,0.98,0.95,
+    0.80,0.82,0.79,0.81,0.83,0.80,
+    0.65,0.67,0.66,0.64,0.68,0.65,
+    0.40,0.42,0.39,0.41,0.43,0.40
+  )
+)
+
+# Normalize to control (viability %)
+control_mean <- mean(data$Absorbance[data$Treatment=="Control"])
+
+data <- data %>%
+  mutate(Viability = (Absorbance/control_mean)*100)
+
+# Summary statistics
+summary_data <- data %>%
+  group_by(Treatment) %>%
+  summarise(
+    mean = mean(Viability),
+    sd = sd(Viability),
+    sem = sd/sqrt(n())
+  )
+
+# ANOVA
+anova_result <- aov(Viability ~ Treatment, data = data)
+summary(anova_result)
+
+# GraphPad-style plot
+ggplot(summary_data, aes(x = Treatment, y = mean)) +
+  
+  geom_bar(stat="identity", width=0.6, fill="grey70", color="black") +
+  
+  geom_errorbar(aes(ymin = mean-sem, ymax = mean+sem), width=0.2) +
+  
+  geom_jitter(data=data,
+              aes(x=Treatment, y=Viability),
+              width=0.08,
+              size=2) +
+  
+  theme_classic() +
+  
+  labs(
+    title="MTS Cell Viability Assay",
+    x="Treatment",
+    y="Cell viability (% of control)"
+  ) +
+  
+  stat_compare_means(method="anova")
