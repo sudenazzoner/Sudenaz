@@ -1,0 +1,55 @@
+# 1. Load Libraries
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("flowCore")) BiocManager::install("flowCore")
+library(flowCore)
+library(ggplot2)
+library(dplyr)
+
+# 2. Configuration
+input_path <- "./fcs_files/" # Change to your folder
+mito_channel <- "PE-A"        # Change to your Mito-dye channel
+output_pdf <- "Mitochondrial_Analysis_Report.pdf"
+
+file_list <- list.files(path = input_path, pattern = "\\.fcs$", full.names = TRUE)
+
+# 3. Initialize Results
+results_list <- list()
+
+# 4. Open PDF Device
+pdf(output_pdf, width = 8, height = 6)
+
+for (file in file_list) {
+  # Load and basic gate (FSC > 20000 to remove debris)
+  fcs <- read.FCS(file, transformation = FALSE, truncate_max_range = FALSE)
+  df <- as.data.frame(exprs(fcs))
+  clean_df <- df %>% filter(`FSC-A` > 20000)
+  
+  # Calculate Median
+  mfi_val <- median(clean_df[[mito_channel]])
+  s_name <- basename(file)
+  
+  # Store Result
+  results_list[[s_name]] <- data.frame(Sample = s_name, MFI = mfi_val)
+  
+  # Generate Plot
+  p <- ggplot(clean_df, aes_string(x = mito_channel)) +
+    geom_density(fill = "firebrick", alpha = 0.5) +
+    scale_x_log10() + # Mitochondrial data is almost always log-scale
+    geom_vline(xintercept = mfi_val, linetype = "dashed", color = "black") +
+    annotate("text", x = mfi_val, y = 0.5, label = paste("MFI:", round(mfi_val, 2)), 
+             hjust = -0.1, fontface = "bold") +
+    labs(title = paste("Sample:", s_name),
+         x = paste("Mitochondrial Intensity (", mito_channel, ")"),
+         y = "Cell Density") +
+    theme_minimal()
+  
+  print(p) # This saves the plot as a page in the PDF
+}
+
+dev.off() # Close the PDF
+
+# 5. Save the CSV Table
+final_table <- bind_rows(results_list)
+write.csv(final_table, "Mitochondrial_MFI_Summary.csv", row.names = FALSE)
+
+cat("Done! Check", output_pdf, "for plots and Mitochondrial_MFI_Summary.csv for values.")
