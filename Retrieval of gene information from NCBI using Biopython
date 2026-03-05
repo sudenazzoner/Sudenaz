@@ -1,0 +1,8 @@
+from Bio import Entrez
+
+Entrez.email = "gogol.7dante@gmail.com"
+
+handle = Entrez.esearch(db="gene", term="ULK1[gene] AND human[orgn]")
+record = Entrez.read(handle)
+
+print(record["IdList"])
