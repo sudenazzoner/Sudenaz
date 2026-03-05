@@ -1,0 +1,16 @@
+import pandas as pd
+import numpy as np
+
+data = {
+    "Sample": ["Control","DrugA","DrugB"],
+    "Rep1": [0.95,0.70,0.55],
+    "Rep2": [0.96,0.72,0.58],
+    "Rep3": [0.94,0.71,0.57]
+}
+
+df = pd.DataFrame(data)
+
+df["Mean"] = df[["Rep1","Rep2","Rep3"]].mean(axis=1)
+df["SD"] = df[["Rep1","Rep2","Rep3"]].std(axis=1)
+
+print(df)
